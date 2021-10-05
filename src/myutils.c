@@ -25,11 +25,11 @@ void writeSortedResultToFile(char* myID, int arr[], int size) {
 
 // TODO: Quick Sort or another leaf node sorting algorithm
 void quickSort(int arr[], int low, int high) {
+    
 }
 
 
 // TODO: Multiway Merge Sort with multiple data streams from intermediate files
 void merge(char* myID, int depth, int nChild) {
-
-
+    
 }
