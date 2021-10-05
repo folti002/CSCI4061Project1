@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
     char* inputFileName = argv[6];
 
     // TODO: Write child program code here
-    printf("%d Quick Sort\n", myID);
+    printf("[Leaf] Quick Sort\n");
 
     return EXIT_SUCCESS;
 }
