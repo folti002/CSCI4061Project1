@@ -36,33 +36,35 @@ int main(int argc, char *argv[]) {
         sscanf(line, "%d %d\n", &nData, &depth);
     }
 
-    // FOR INTERIM SUBMISSION
-    depth = 1;
-
-    // TODO: Read degrees of each level
-
-    // FOR INTERIM SUBMISSION
-    int degree = 3;
-
-    // THIS WON'T WORK FOR CHECKING IF DEPTHS ARE GREATER THAN 9 OR LESS THAN 0
-    // int* degreesPerLevel = malloc(sizeof(int) * depth);
-    // char temp;
-    // if((nread = getLineFromFile(fp, line, len)) != -1){
-    //     char* curChar = line;
-    //     int i = 0;
-    //     while(*curChar != '\n'){
-    //         if(*curChar != ' '){
-    //             degreesPerLevel[i] = atoi(curChar);
-    //             i++;
-    //         }
-    //         curChar++;
-    //     }
-    // }
-
-    // for(int j = 0; j < depth; j++){
-    //     printf("%d ", degreesPerLevel[j]);
-    // }
-    // printf("\n");
+    // TODO: Read degrees of each level - DONE
+    int* degreesPerLevel = malloc(sizeof(int) * depth);
+    if(depth != 0){
+        char* token;
+        char* delimiter = " ";
+        int i = 0;
+        if((nread = getLineFromFile(fp, line, len)) != -1){
+            token = strtok(line, delimiter);
+            if(token == NULL){
+                printf("No degrees arguments found despite a number greater than zero being specified.\n");
+                exit(0);
+            }
+            while(token != NULL){
+                int curDegree = atoi(token);
+                if(curDegree >= 0 && curDegree <= 9){
+                    degreesPerLevel[i++] = curDegree;
+                } else {
+                    printf("Degree greater than 10 or less than 0 found.\n");
+                    exit(0);
+                }
+                token = strtok(NULL, delimiter);
+            }
+        }
+    }
+    
+    for(int j = 0; j < depth; j++){
+        printf("%d ", degreesPerLevel[j]);
+    }
+    printf("\n");
 
     // Read input data
     int * input = (int *)malloc(sizeof(int) * nData);
@@ -96,15 +98,7 @@ int main(int argc, char *argv[]) {
     } else if(depth == 0) {
         // NO NEED TO MAKE CHILD PROCESSES
     } else {
-        // int curDegree = degreesPerLevel[degreesTableIndex];
-
-        // FOR INTERIM SUBMISSION
-        for(int i = 0; i < degree; i++){
-            pid = fork();
-            if(pid == 0){
-                break;
-            }
-        }
+        int curDegree = degreesPerLevel[degreesTableIndex];
 
         // for(int i = 0; i < curDegree; i++){
         //     pid = fork();
@@ -133,12 +127,6 @@ int main(int argc, char *argv[]) {
     }
 
     // TODO: Wait all child processes to terminate if necessary
-    for(int i = 0; i < degree; i++){
-        if(pid != 0){
-            terminated_pid = wait(NULL);
-            //printf("Process %d has terminated.\n", terminated_pid);
-        }
-    }   
 
     if(pid != 0){
         printf("[Master] Merge Sort\n");
@@ -153,7 +141,7 @@ int main(int argc, char *argv[]) {
     // printf("Process [%s] - Quick Sort - Done", myID);
 
     free(input);
-    //free(degreesPerLevel);
+    free(degreesPerLevel);
 
     return EXIT_SUCCESS;
 }

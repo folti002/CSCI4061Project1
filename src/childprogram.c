@@ -18,7 +18,12 @@ int main(int argc, char *argv[]) {
     char* inputFileName = argv[6];
 
     // TODO: Write child program code here
-    printf("[Leaf] Quick Sort\n");
+    // printf("[Leaf] Quick Sort\n");
+
+    //int arr[] = NULL;
+
+    // Have to write to file the sorted contents of the array passed into this function
+    // writeSortedResultToFile(strMyID, arr, myDataLen);
 
     return EXIT_SUCCESS;
 }
