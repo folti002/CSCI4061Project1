@@ -38,13 +38,13 @@ int main(int argc, char *argv[]) {
 
     // TODO: Read degrees of each level - DONE
     int* degreesPerLevel = malloc(sizeof(int) * depth);
-    char* strDegreesArr = (char*) malloc(sizeof(char) * LineBufferSize);
+    //char* strDegreesArr = (char*) malloc(sizeof(char) * LineBufferSize);
     if(depth != 0){
         char* token;
         char* delimiter = " ";
         int i = 0;
         if((nread = getLineFromFile(fp, line, len)) != -1){
-            strcpy(strDegreesArr, line);
+            //strcpy(strDegreesArr, line);
             token = strtok(line, delimiter);
             if(token == NULL){
                 printf("No degrees arguments found despite a number greater than zero being specified.\n");
@@ -63,6 +63,8 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    printArray(degreesPerLevel, depth);
+
     // Read input data
     int * input = (int *)malloc(sizeof(int) * nData);
     int aNumber;
@@ -75,66 +77,119 @@ int main(int argc, char *argv[]) {
     free(line);
     fclose(fp);
 
+    printArray(input, nData);
     
     // TODO: Spawn child processes and launch childProgram if necessary
-    char* strID = "master";
+    char* strID = "";
+    char newID[MaxDepth];
 
     int startIndex = 0;
-    char strStartIndex[100];
-    sprintf(strStartIndex, "%d", startIndex);
-
-    int endIndex = nData;
-    char strEndIndex[100];
-    sprintf(strEndIndex, "%d", endIndex);
-
-    int dataSize = endIndex - startIndex;
-    char strDataSize[100];
-    sprintf(strDataSize, "%d", dataSize);
+    int endIndex = -1;
     
     int myDepth = 0;
-    int childrenMade = 0;
 
     pid_t pid;
     if(depth < 0){
         printf("Depth of less than 0 found.\n");
         exit(0);
-    } else if(depth > 0) {
-        //int degree = degreesPerLevel[0];
-
-        char* token;
-        char* delimiter = " ";
-        printf("strDegreesArr: %s", strDegreesArr);
-        token = strtok(strDegreesArr, delimiter);
-        int degree = atoi(token);
-        printf("Degree in master: %d\n", degree);
-
-        for(int i = 0; i < degree; i++){
-            childrenMade++;
-            char childID[MaxDepth];
-            sprintf(childID, "%d", childrenMade);
+    }
+    
+    // SPAWN CHILDREN
+    for(int curDepth = 0; curDepth < depth; curDepth++){
+        int degree = degreesPerLevel[curDepth];
+        int curID = 0;
+        for(int j = 0; j < degree; j++){
+            curID++;
+            strID = newID;
             pid = fork();
-
-            if(pid > 0){
-                // Print to console information about the child that was just created
-                printf("Parent [%s] - Spawn Child [Level: %d, ID: %s, Start Index: %d, End Index: %d, Data Size: %d]\n", strID, myDepth + 1, childID, startIndex, endIndex, dataSize);
-            } else if(pid < 0){
+            if(pid < 0){
                 // Child process not created properly
                 printf("Error creating child process.\n");
                 exit(0);
-            } else {
-                // CALL CHILD PROGRAM
-                char strChildDepth[MaxDepth];
-                sprintf(strChildDepth, "%d", myDepth + 1);
-
-                char totalDepth[MaxDepth];
-                sprintf(totalDepth, "%d", depth);
-                
-                execl("childProgram", "childProgram", strChildDepth, childID, strStartIndex, strEndIndex, strDataSize, inputFileName, totalDepth, strDegreesArr, NULL);
-                printf("Error executing childProgram.\n");
-                exit(0);
+            } else if(pid == 0){
+                sprintf(newID, "%s%d", strID, curID);
+                if(curDepth == 0){
+                    strID = "master";
+                }
+                printf("String ID: %s\n", strID);
+                printf("Parent [%s] - Spawn Child [Level: %d, ID: %s]\n", strID, curDepth + 1, newID);
+                //printf("Parent [%s] - Spawn Child [Level: %d, ID: %s, Start Index: %d, End Index: %d, Data Size: %d]\n", strID, myDepth + 1, childID, startIndex, endIndex, dataSize);
+                break;
             }
         }
+        if(pid > 0){
+            break;
+        }
     }
+
+    // WAIT FOR CHILDREN
+    if(pid > 0){
+        for(int i = 0; i < depth; i++){
+            int degree = degreesPerLevel[i];
+            pid_t terminated_pid;
+            for(int j = 0; j < degree; j++){
+                terminated_pid = wait(NULL);
+            }
+        }
+    } else {
+        printf("I am a leaf node, ID: %s\n", strID); 
+    }
+
+    // 
+
+
+//     for(int i = 0; i < degree; i++){
+//         childrenMade++;
+//         char childID[MaxDepth];
+//         sprintf(childID, "%d", childrenMade);
+
+//         // CALCULATE START AND END INDEX
+//         int m = nData;
+//         int k = degree;
+
+//         if(i == degree - 1){
+//             int temp = endIndex;
+//             startIndex = endIndex;
+//             endIndex = nData;
+//         } else {
+//             int temp = startIndex;
+//             startIndex += i * floor(m / k);
+//             endIndex = temp + floor(m / k);
+//         }
+
+//         char strStartIndex[100];
+//         sprintf(strStartIndex, "%d", startIndex);
+
+//         char strEndIndex[100];
+//         sprintf(strEndIndex, "%d", endIndex);
+
+//         int dataSize = endIndex - startIndex;
+//         char strDataSize[100];
+//         sprintf(strDataSize, "%d", dataSize);
+
+//         pid = fork();
+
+//         if(pid > 0){
+//             // Print to console information about the child that was just created
+//             printf("Parent [%s] - Spawn Child [Level: %d, ID: %s, Start Index: %d, End Index: %d, Data Size: %d]\n", strID, myDepth + 1, childID, startIndex, endIndex, dataSize);
+//         } else if(pid < 0){
+//             // Child process not created properly
+//             printf("Error creating child process.\n");
+//             exit(0);
+//         } else {
+//             // CALL CHILD PROGRAM
+//             char strChildDepth[MaxDepth];
+//             sprintf(strChildDepth, "%d", myDepth + 1);
+
+//             char totalDepth[MaxDepth];
+//             sprintf(totalDepth, "%d", depth);
+            
+//             execl("childProgram", "childProgram", strChildDepth, childID, strStartIndex, strEndIndex, strDataSize, inputFileName, totalDepth, strDegreesArr, NULL);
+//             printf("Error executing childProgram.\n");
+//             exit(0);
+//         }
+//     }
+
 
     // myID as a string
     // char asStrID[MaxDepth];
@@ -146,11 +201,11 @@ int main(int argc, char *argv[]) {
     // }
 
     // TODO: Wait all child processes to terminate if necessary
-    pid_t terminated_pid;
-    for(int i = 0; i < degreesPerLevel[0]; i++){
-        terminated_pid = wait(NULL);
-        printf("Child process (%d) terminated.\n", terminated_pid);
-    }
+    // pid_t terminated_pid;
+    // for(int i = 0; i < degreesPerLevel[0]; i++){
+    //     terminated_pid = wait(NULL);
+    //     printf("Child process (%d) terminated.\n", terminated_pid);
+    // }
 
     // TODO: Merge sort or Quick sort (or other leaf node sorting algorithm)
     
@@ -162,7 +217,7 @@ int main(int argc, char *argv[]) {
 
     free(input);
     free(degreesPerLevel);
-    free(strDegreesArr);
+    // free(strDegreesArr);
 
     return EXIT_SUCCESS;
 }

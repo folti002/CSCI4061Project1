@@ -5,7 +5,7 @@ int main(int argc, char *argv[]) {
     // TODO: CHANGE AMOUNT OF ARGS NECESSARY
     if (argc < 9) {
         printf("Less number of arguments.\n");
-        printf("./childProgram myDepth parentID startIdx endIdx myDataLen InputFileName depth degreesArr\n");
+        printf("./childProgram myDepth parentID startIdx endIdx myDataLen InputFileName depth\n");
         fflush(stdout);
         exit(EXIT_FAILURE);
     }
@@ -18,8 +18,8 @@ int main(int argc, char *argv[]) {
     char* inputFileName = argv[6];
     // Additional args
     int depth = strtol(argv[7], NULL, 10); // Holds the total depth of the sort
-    char* degreesArr = argv[8]; // The degrees array in string format
-    printf("Degrees array in child: %s\n", degreesArr);
+    // char* degreesArr = argv[8]; // The degrees array in string format
+    // printf("Degrees array in child: %s\n", degreesArr);
 
     // TODO: Write child program code here
     if(myDepth == depth){
@@ -27,28 +27,21 @@ int main(int argc, char *argv[]) {
         printf("Calling quick sort algorithm.\n");
         exit(0);
     } else {
+        // Read degree of current depth to know how many children to make
+        int degree = 0;
+        printf("Inside child: %s with degree %d\n", strMyID, degree);
+
         // EXEC childProgram degree NUMBER OF TIMES
         int childrenMade = 0;
         // WAIT FOR CHILDREN
+        pid_t terminated_pid;
+        for(int i = 0; i < degree; i++){
+            terminated_pid = wait(NULL);
+        }
         // READ FROM INTERMEDIATE FILE OF CHILDREN
         // MERGE THE FILES
         // RETURN
     }
-
-    // Read degree of current depth to know how many children to make
-    int degree = 0;
-    char* delimiter = " ";
-    char* token = strtok(degreesArr, delimiter);
-    printf("Token in child %s: %s\n", strMyID, token);
-    if(token == NULL){
-        printf("Degrees amount not found for current depth: %d\n", myDepth);
-        exit(0);
-    }
-    for(int i = 1; i < depth; i++){
-        token = strtok(NULL, delimiter);
-    }
-    degree = atoi(token);
-    printf("Inside child: %s with degree %d\n", strMyID, degree);
 
     // int arr[] = NULL;
 
