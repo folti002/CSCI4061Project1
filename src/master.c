@@ -131,11 +131,16 @@ int main(int argc, char *argv[]) {
                 terminated_pid = wait(NULL);
             }
         }
+        // EXECUTE CHILD PROGRAM - CALL MERGE SORT
+
     } else {
         printf("I am a leaf node, ID: %s\n", strID); 
+        // EXECUTE CHILD PROGRAM - CALL QUICK SORT
+
     }
 
-    // 
+    // ONLY THE MASTER PROCESS SHOULD GET TO THIS POINT
+    strID = "master";
 
 
 //     for(int i = 0; i < degree; i++){
