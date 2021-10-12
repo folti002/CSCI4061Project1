@@ -48,6 +48,17 @@ int main(int argc, char *argv[]) {
         printf("This is a leaf node, ID: %s\n", strMyID);
     } else {
         // CALL MERGE SORT
+        char* curID = malloc(sizeof(char));
+        int* childArray[MaxDataSize] = malloc(sizeof(int)*MaxDataSize*nChild);
+        int curArray[] = malloc(sizeof(int) * MaxDataSize);
+        for (int i = 1; i <= nChild; i++){
+            sprintf(curID, "%s%d", myID,i);
+            int curIndex = 0;
+            //while(// There are more lines in the file){
+                // Read from file to get array inputs
+                // curArray[j] = // next int read from file
+            //}
+        }
         printf("NOT a leaf node, ID: %s\n", strMyID);
     }
 
