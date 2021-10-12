@@ -58,7 +58,7 @@ void merge(int arrOne[], int arrTwo[], int lenOne, int lentwo) {
    int i;
    int j;
    int x;
-   int merged[] = malloc sizeof(int)*(lenOne+lenTwo);
+   int merged[] = malloc(sizeof(int)*(lenOne+lenTwo));
 
    for (x = 0; x < lenOne+lenTwo; x++){
       for (i = 0; i<lenOne; i++){
