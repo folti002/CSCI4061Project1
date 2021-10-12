@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
     printArray(input, nData);
     
     // TODO: Spawn child processes and launch childProgram if necessary
-    char* strID = "";
+    char strID[MaxDepth];
     char newID[MaxDepth];
 
     int startIndex = 0;
@@ -95,12 +95,10 @@ int main(int argc, char *argv[]) {
     }
     
     // SPAWN CHILDREN
-    for(int curDepth = 0; curDepth < depth; curDepth++){
-        int degree = degreesPerLevel[curDepth];
-        int curID = 0;
-        for(int j = 0; j < degree; j++){
-            curID++;
-            strID = newID;
+    for(int curDepth = 1; curDepth <= depth; curDepth++){
+        int degree = degreesPerLevel[curDepth - 1];
+        for(int curID = 1; curID <= degree; curID++){
+            strcpy(strID, newID);
             pid = fork();
             if(pid < 0){
                 // Child process not created properly
@@ -108,11 +106,11 @@ int main(int argc, char *argv[]) {
                 exit(0);
             } else if(pid == 0){
                 sprintf(newID, "%s%d", strID, curID);
-                if(curDepth == 0){
-                    strID = "master";
+                if(curDepth == 1){
+                    strcpy(strID, "master");
                 }
-                printf("String ID: %s\n", strID);
-                printf("Parent [%s] - Spawn Child [Level: %d, ID: %s]\n", strID, curDepth + 1, newID);
+                //printf("String ID: %s\n", strID);
+                printf("Parent [%s] - Spawn Child [Level: %d, ID: %s]\n", strID, curDepth, newID);
                 //printf("Parent [%s] - Spawn Child [Level: %d, ID: %s, Start Index: %d, End Index: %d, Data Size: %d]\n", strID, myDepth + 1, childID, startIndex, endIndex, dataSize);
                 break;
             }
@@ -121,6 +119,7 @@ int main(int argc, char *argv[]) {
             break;
         }
     }
+
 
     // WAIT FOR CHILDREN
     if(pid > 0){
@@ -140,7 +139,7 @@ int main(int argc, char *argv[]) {
     }
 
     // ONLY THE MASTER PROCESS SHOULD GET TO THIS POINT
-    strID = "master";
+    strcpy(strID, "master");
 
 
 //     for(int i = 0; i < degree; i++){
