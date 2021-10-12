@@ -87,42 +87,58 @@ int main(int argc, char *argv[]) {
     char newID[128];
 
     int startIndex = 0;
-    int endIndex = -1;
-    int dataSize = 0;
-    
-    int curDepth = 1;
-
-    int numberOfChildren = 0;
-    int temp;
+    int endIndex = 0;
+    int curDataSize = nData;
+    int childDataSize = 0;
+    int childStartIndex = endIndex;
+    int newStartIndex = 0;
 
     int isChild = 0;
-
-    pid_t pid = 1;
+    int pid;
     
     // SPAWN CHILDREN
-    for( ; curDepth <= depth; curDepth++){
+    for(int curDepth = 1; curDepth <= depth; curDepth++){
         int degree = degreesPerLevel[curDepth - 1];
         for(int curID = 1; curID <= degree; curID++){
             strcpy(strID, newID);
             pid = fork();
+
+            // Data Partitions
+            if(curID == degree){
+                // THIS IS THE SPECIAL CASE FOR DATA PARTITIONING
+                childDataSize = curDataSize - (degree - 1) * floor(curDataSize / degree);
+            } else {
+                // NORMAL FLOOR CALCULATIONS
+                childDataSize = floor(curDataSize / degree);
+            }
+
             if(pid > 0){
-                // printf("PROCESS CREATED: %d\n", pid);
+                //printf("PROCESS CREATED: %d\n", pid);
+                newStartIndex += childDataSize;
             } else if(pid < 0){
                 // Child process not created properly
                 printf("Error creating child process.\n");
                 exit(0);
             } else if(pid == 0){
+                if(curID != 1){
+                    startIndex = newStartIndex;
+                }
+                endIndex = startIndex + childDataSize - 1;
+                childStartIndex = startIndex;
+                curDataSize = endIndex - startIndex + 1;
+
                 isChild = 1;
                 sprintf(newID, "%s%d", strID, curID);
                 if(curDepth == 1){
                     strcpy(strID, "master");
                 }
                 //printf("String ID: %s\n", strID);
-                printf("Parent [%s] - Spawn Child [Level: %d, ID: %s]\n", strID, curDepth, newID);
+                printf("Parent [%s] - Spawn Child [Level: %d, ID: %s, Start Index: %d, End Index: %d, Data Size: %d]\n", strID, curDepth, newID, startIndex, endIndex, curDataSize);
                 //printf("Parent [%s] - Spawn Child [Level: %d, ID: %s, Start Index: %d, End Index: %d, Data Size: %d]\n", strID, myDepth + 1, childID, startIndex, endIndex, dataSize);
                 break;
             }
         }
+        // Stop creating children if we are a parent process
         if(pid > 0){
             break;
         }
@@ -131,6 +147,8 @@ int main(int argc, char *argv[]) {
     // if(pid == 0){
     //     printf("I am a leaf node with ID: %s, isChild: %d\n", newID, isChild);
     // }
+
+    int numberOfChildren;
 
     pid_t terminated_pid;
     if(isChild){
@@ -151,7 +169,7 @@ int main(int argc, char *argv[]) {
         sprintf(strCurDepth, "%d", depthOfCurrentProcess);
         sprintf(strStartIndex, "%d", startIndex);
         sprintf(strEndIndex, "%d", endIndex);
-        sprintf(strDataLen, "%d", dataSize);
+        sprintf(strDataLen, "%d", curDataSize); // FIX VARIABLE HERE
         sprintf(strDepth, "%d", depth);
 
         // CALL CHILD PROGRAM
