@@ -45,10 +45,12 @@ int main(int argc, char *argv[]) {
 
     if(myDepth == depth){
         // CALL QUICK SORT
-        printf("This is a leaf node, ID: %s\n", strMyID);
+        printf("This is a leaf node, ID: %s, Start Index: %d, End Index: %d, Data Size: %d\n", strMyID, myStartIdx, myEndIdx, myDataLen);
+
+
     } else {
         // CALL MERGE SORT
-        printf("NOT a leaf node, ID: %s\n", strMyID);
+        printf("NOT a leaf node, ID: %s, Start Index: %d, End Index: %d, Data Size: %d\n", strMyID, myStartIdx, myEndIdx, myDataLen);
     }
 
     //printf("Inside child program, ID: %s, Depth: %d, Total Depth: %d\n", strMyID, myDepth, depth);
