@@ -50,7 +50,21 @@ int main(int argc, char *argv[]) {
 
     } else {
         // CALL MERGE SORT
+
+        char* curID = malloc(sizeof(char));
+        int* childArray[MaxDataSize] = malloc(sizeof(int)*MaxDataSize*nChild);
+        int curArray[] = malloc(sizeof(int) * MaxDataSize);
+        for (int i = 1; i <= nChild; i++){
+            sprintf(curID, "%s%d", myID,i);
+            int curIndex = 0;
+            //while(// There are more lines in the file){
+                // Read from file to get array inputs
+                // curArray[j] = // next int read from file
+            //}
+        }
+        
         printf("NOT a leaf node, ID: %s, Start Index: %d, End Index: %d, Data Size: %d\n", strMyID, myStartIdx, myEndIdx, myDataLen);
+
     }
 
     //printf("Inside child program, ID: %s, Depth: %d, Total Depth: %d\n", strMyID, myDepth, depth);

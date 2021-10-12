@@ -26,13 +26,11 @@ void writeSortedResultToFile(char* myID, int arr[], int size) {
 // TODO: Quick Sort or another leaf node sorting algorithm
 void quickSort(int arr[], int low, int high) {
    int a, b, split, temp;
-   int first = low;
-   int last = high;
-
+   
    if(low<high){
-      split=first;
-      a=first;
-      b=last;
+      split=low;
+      a=low;
+      b=high;
 
       while(a<b){
          while(arr[a]<=arr[split]&&a<high)
@@ -57,5 +55,15 @@ void quickSort(int arr[], int low, int high) {
 
 // TODO: Multiway Merge Sort with multiple data streams from intermediate files
 void merge(char* myID, int depth, int nChild) {
-    
+   char* curID = malloc(sizeof(char));
+   int* childArray[MaxDataSize] = malloc(sizeof(int)*MaxDataSize*nChild);
+   int curArray[] = malloc(sizeof(int) * MaxDataSize);
+    for (int i = 1; i <= nChild; i++){
+      sprintf(curID, "%s%d", myID,i);
+      int curIndex = 0;
+      //while(// There are more lines in the file){
+         // Read from file to get array inputs
+         // curArray[j] = // next int read from file
+      //}
+   }
 }
