@@ -54,16 +54,24 @@ void quickSort(int arr[], int low, int high) {
 
 
 // TODO: Multiway Merge Sort with multiple data streams from intermediate files
-void merge(char* myID, int depth, int nChild) {
-   char* curID = malloc(sizeof(char));
-   int* childArray[MaxDataSize] = malloc(sizeof(int)*MaxDataSize*nChild);
-   int curArray[] = malloc(sizeof(int) * MaxDataSize);
-    for (int i = 1; i <= nChild; i++){
-      sprintf(curID, "%s%d", myID,i);
-      int curIndex = 0;
-      //while(// There are more lines in the file){
-         // Read from file to get array inputs
-         // curArray[j] = // next int read from file
-      //}
+void merge(int arrOne[], int arrTwo[], int lenOne, int lentwo) {
+   int i;
+   int j;
+   int x;
+   int merged[] = malloc sizeof(int)*(lenOne+lenTwo);
+
+   for (x = 0; x < lenOne+lenTwo; x++){
+      for (i = 0; i<lenOne; i++){
+         for (j = 0; j < lenTwo; j++){
+            if (arrOne[i] > arrTwo[j]){
+               merged[x] = arrTwo[j];
+            }else if (arrOne[i] < arrTwo[j]){
+               merged[x] = arrOne[i];
+            }else{
+               merged[x] = arrOne[i];
+            }
+         }
+         
+      }
    }
 }
