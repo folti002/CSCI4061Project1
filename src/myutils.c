@@ -25,7 +25,9 @@ void writeSortedResultToFile(char* myID, int arr[], int size) {
 
 // TODO: Quick Sort or another leaf node sorting algorithm
 void quickSort(int arr[], int low, int high) {
-    int a, b, split, temp;
+   int a, b, split, temp;
+   int first = low;
+   int last = high;
 
    if(low<high){
       split=first;
@@ -47,11 +49,9 @@ void quickSort(int arr[], int low, int high) {
       temp=arr[split];
       arr[split]=arr[b];
       arr[b]=temp;
-      quicksort(arr,low,b-1);
-      quicksort(arr,b+1,high);
-
+      quickSort(arr,low,b-1);
+      quickSort(arr,b+1,high);
    }
-}
 }
 
 
