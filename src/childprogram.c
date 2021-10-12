@@ -43,7 +43,15 @@ int main(int argc, char *argv[]) {
     //     // RETURN
     // }
 
-    printf("Inside child program, ID: %s, Depth: %d\n", strMyID, myDepth);
+    if(myDepth == depth){
+        // CALL QUICK SORT
+        printf("This is a leaf node, ID: %s\n", strMyID);
+    } else {
+        // CALL MERGE SORT
+        printf("NOT a leaf node, ID: %s\n", strMyID);
+    }
+
+    //printf("Inside child program, ID: %s, Depth: %d, Total Depth: %d\n", strMyID, myDepth, depth);
 
 
     // Have to write to file the sorted contents of the array passed into this function

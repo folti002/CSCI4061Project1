@@ -88,6 +88,7 @@ int main(int argc, char *argv[]) {
 
     int startIndex = 0;
     int endIndex = -1;
+    int dataSize = 0;
     
     int curDepth = 1;
 
@@ -123,55 +124,45 @@ int main(int argc, char *argv[]) {
             }
         }
         if(pid > 0){
-            numberOfChildren = degreesPerLevel[curDepth];
-            // if(curDepth == 1){
-            //     strcpy(strID, "master");
-            // }
             break;
-        } else {
-
         }
     }
 
-
-    // WAIT FOR CHILDREN
-    // if(pid > 0){
-    //     for(int i = 0; i < depth; i++){
-    //         int degree = degreesPerLevel[i];
-    //         pid_t terminated_pid;
-    //         for(int j = 0; j < degree; j++){
-    //             terminated_pid = wait(NULL);
-    //         }
-    //     }
-    //     // EXECUTE CHILD PROGRAM - CALL MERGE SORT
-
-    // } else {
-    //     printf("I am a leaf node, ID: %s\n", strID); 
-    //     // EXECUTE CHILD PROGRAM - CALL QUICK SORT
-
+    // if(pid == 0){
+    //     printf("I am a leaf node with ID: %s, isChild: %d\n", newID, isChild);
     // }
 
     pid_t terminated_pid;
     if(isChild){
-        int depthOfCurrentProcess = strlen(strID);
-        for(int i = 0; i < degreesPerLevel[depthOfCurrentProcess]; i++){
+        // WAIT FOR NODES AT A LOWER DEPTH BEFORE CONTINUING
+        int depthOfCurrentProcess = strlen(newID);
+        numberOfChildren = degreesPerLevel[depthOfCurrentProcess];
+        for(int i = 0; i < numberOfChildren; i++){
             terminated_pid = wait(NULL);
             // printf("TERMINATED PROCESS: %d\n", terminated_pid);
         }
 
         // CONVERT ALL DATA VARIABLES TO STRINGS
         char* strCurDepth = (char*) malloc(sizeof(char) * 128);
+        char* strStartIndex = (char*) malloc(sizeof(char) * 128);
+        char* strEndIndex = (char*) malloc(sizeof(char) * 128);
+        char* strDataLen = (char*) malloc(sizeof(char) * 128);
+        char* strDepth = (char*) malloc(sizeof(char) * 128);
         sprintf(strCurDepth, "%d", depthOfCurrentProcess);
+        sprintf(strStartIndex, "%d", startIndex);
+        sprintf(strEndIndex, "%d", endIndex);
+        sprintf(strDataLen, "%d", dataSize);
+        sprintf(strDepth, "%d", depth);
 
         // CALL CHILD PROGRAM
-        execl("childProgram", "childProgram", strCurDepth, strID, "0", "0", "0", inputFileName, "0", NULL);
+        execl("childProgram", "childProgram", strCurDepth, newID, strStartIndex, strEndIndex, strDataLen, inputFileName, strDepth, NULL);
         printf("Error executing child program, strID: %s\n", strID);
         exit(EXIT_FAILURE);
     }
 
     // ONLY MASTER GETS TO THIS POINT
-    int numWaits = degreesPerLevel[0];
-    for(int i = 0; i < numWaits; i++){
+    numberOfChildren = degreesPerLevel[0];
+    for(int i = 0; i < numberOfChildren; i++){
         terminated_pid = wait(NULL);
     }
     printf("I AM THE MASTER\n");
