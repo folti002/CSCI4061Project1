@@ -181,13 +181,20 @@ int main(int argc, char *argv[]) {
         terminated_pid = wait(NULL);
     }
 
+
+    // IF WE HAVE NO CHILDREN, CALL QUICK SORT DIRECTLY
     if(numberOfChildren == 0){
-        // CALL QUICK SORT
-        quickSort(input, 0, nData - 1);
+        quickSort(input, 0, nData);
         writeSortedResultToFile("master", input, nData);
         printf("Process [master] - Quick Sort - Done\n");
         return EXIT_SUCCESS;
     }
+
+
+
+
+
+
 
     // CALL MERGE SORT FROM INTERMEDIATE FILES
 
@@ -211,6 +218,7 @@ int main(int argc, char *argv[]) {
     int dataAmount;
     if((nread = getLineFromFile(fp, line, len)) != 1){
         sscanf(line, "%d\n", &dataAmount);
+        //printf("Data Amount read in: %d\n", dataAmount); // THIS WORKS CORRECTLY
     }
 
     // Allocate memory for the first array to be read in
@@ -240,6 +248,7 @@ int main(int argc, char *argv[]) {
         // Get amount of data that this file has - store in dataAmount
         if((nread = getLineFromFile(fp, line, len)) != 1){
             sscanf(line, "%d\n", &newDataAmount);
+            //printf("Data Amount read in: %d\n", newDataAmount); // THIS WORKS CORRECTLY
         }
 
         // printf("File Name: %s, Data Amount: %d\n", filename, newDataAmount);
@@ -254,9 +263,9 @@ int main(int argc, char *argv[]) {
             arr[idxInput++] = aNumber;
         }
 
-        // printf("%s prevArr: ", strMyID);
+        // printf("prevArr: ");
         // printArray(prevArr, dataAmount); // testing
-        // printf("%s arr: ", strMyID);
+        // printf("arr: ");
         // printArray(arr, newDataAmount); // testing
 
         // Allocate space for a new array to hold the merged arrays
@@ -282,15 +291,14 @@ int main(int argc, char *argv[]) {
         free(newData);
     }
 
+    writeSortedResultToFile("master", prevArr, dataAmount);
+    printf("Process [master] - Merge Sort - Done\n");
+
     // Free items used for merge
     free(filename);
     free(prevArr);
     free(line);
     fclose(fp);
-
-
-    writeSortedResultToFile("master", prevArr, dataAmount);
-    printf("Process [master] - Merge Sort - Done\n");
 
     // Free malloc'd arrays
     free(input);
