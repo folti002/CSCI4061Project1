@@ -113,13 +113,13 @@ int main(int argc, char *argv[]) {
             }
 
             if(pid > 0){
-                //printf("PROCESS CREATED: %d\n", pid);
                 newStartIndex += childDataSize;
             } else if(pid < 0){
                 // Child process not created properly
                 printf("Error creating child process.\n");
                 exit(0);
             } else if(pid == 0){
+                // Logic for updating indexes for data partitioning
                 if(curID != 1){
                     startIndex = newStartIndex;
                 }
@@ -127,6 +127,7 @@ int main(int argc, char *argv[]) {
                 childStartIndex = startIndex;
                 curDataSize = endIndex - startIndex + 1;
 
+                // Set up ID for new child that's just been created
                 isChild = 1;
                 sprintf(newID, "%s%d", strID, curID);
                 if(curDepth == 1){
@@ -144,20 +145,15 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    // if(pid == 0){
-    //     printf("I am a leaf node with ID: %s, isChild: %d\n", newID, isChild);
-    // }
-
+    // TODO: Wait all child processes to terminate if necessary
     int numberOfChildren;
-
     pid_t terminated_pid;
     if(isChild){
         // WAIT FOR NODES AT A LOWER DEPTH BEFORE CONTINUING
         int depthOfCurrentProcess = strlen(newID);
         numberOfChildren = degreesPerLevel[depthOfCurrentProcess];
         for(int i = 0; i < numberOfChildren; i++){
-            terminated_pid = wait(NULL);
-            // printf("TERMINATED PROCESS: %d\n", terminated_pid);
+            terminated_pid = wait(NULL);\
         }
 
         // CONVERT ALL DATA VARIABLES TO STRINGS
@@ -166,11 +162,13 @@ int main(int argc, char *argv[]) {
         char* strEndIndex = (char*) malloc(sizeof(char) * 128);
         char* strDataLen = (char*) malloc(sizeof(char) * 128);
         char* strDepth = (char*) malloc(sizeof(char) * 128);
+        char* strNumChildren = (char*) malloc(sizeof(char) * 128);
         sprintf(strCurDepth, "%d", depthOfCurrentProcess);
         sprintf(strStartIndex, "%d", startIndex);
         sprintf(strEndIndex, "%d", endIndex);
-        sprintf(strDataLen, "%d", curDataSize); // FIX VARIABLE HERE
+        sprintf(strDataLen, "%d", curDataSize);
         sprintf(strDepth, "%d", depth);
+        sprintf(strNumChildren, "%d", numberOfChildren);
 
         // CALL CHILD PROGRAM
         execl("childProgram", "childProgram", strCurDepth, newID, strStartIndex, strEndIndex, strDataLen, inputFileName, strDepth, NULL);
@@ -179,6 +177,7 @@ int main(int argc, char *argv[]) {
     }
 
     // ONLY MASTER GETS TO THIS POINT
+    // Wait for master's children to complete
     numberOfChildren = degreesPerLevel[0];
     for(int i = 0; i < numberOfChildren; i++){
         terminated_pid = wait(NULL);
@@ -186,6 +185,8 @@ int main(int argc, char *argv[]) {
     printf("I AM THE MASTER\n");
 
     // CALL MERGE SORT FROM INTERMEDIATE FILES
+
+
 
 //     for(int i = 0; i < degree; i++){
 //         childrenMade++;
@@ -249,7 +250,7 @@ int main(int argc, char *argv[]) {
     //     exit(0);
     // }
 
-    // TODO: Wait all child processes to terminate if necessary
+
     // pid_t terminated_pid;
     // for(int i = 0; i < degreesPerLevel[0]; i++){
     //     terminated_pid = wait(NULL);
@@ -264,6 +265,7 @@ int main(int argc, char *argv[]) {
     // printf("Process [%s] - Merge Sort - Done", myID);
     // printf("Process [%s] - Quick Sort - Done", myID);
 
+    // Free malloc'd arrays
     free(input);
     free(degreesPerLevel);
 
