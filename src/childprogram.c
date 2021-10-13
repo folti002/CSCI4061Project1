@@ -18,35 +18,11 @@ int main(int argc, char *argv[]) {
     char* inputFileName = argv[6];
     // Additional args
     int depth = strtol(argv[7], NULL, 10); // Holds the total depth of the sort
-    int nChild = strtol(argv[8], NULL, 10);
-    // char* degreesArr = argv[8]; // The degrees array in string format
-    // printf("Degrees array in child: %s\n", degreesArr);
-
-    // TODO: Write child program code here
-    // if(myDepth == depth){
-    //     // CALL QUICK SORT, WRITE TO INTERMEDIATE FILE, AND RETURN
-    //     printf("Calling quick sort algorithm.\n");
-    //     exit(0);
-    // } else {
-    //     // Read degree of current depth to know how many children to make
-    //     int degree = 0;
-    //     printf("Inside child: %s with degree %d\n", strMyID, degree);
-
-    //     // EXEC childProgram degree NUMBER OF TIMES
-    //     int childrenMade = 0;
-    //     // WAIT FOR CHILDREN
-    //     pid_t terminated_pid;
-    //     for(int i = 0; i < degree; i++){
-    //         terminated_pid = wait(NULL);
-    //     }
-    //     // READ FROM INTERMEDIATE FILE OF CHILDREN
-    //     // MERGE THE FILES
-    //     // RETURN
-    // }
+    int nChild = strtol(argv[8], NULL, 10); // Holds number of children this process has
 
     if(myDepth == depth){
         // THIS IS A LEAF NODE - CALL QUICK SORT
-        printf("This is a leaf node, ID: %s, Start Index: %d, End Index: %d, Data Size: %d\n", strMyID, myStartIdx, myEndIdx, myDataLen);
+        // printf("This is a leaf node, ID: %s, Start Index: %d, End Index: %d, Data Size: %d\n", strMyID, myStartIdx, myEndIdx, myDataLen);
 
         FILE* fp;
         char *line = (char *)malloc(sizeof(char) * LineBufferSize);
@@ -84,8 +60,7 @@ int main(int argc, char *argv[]) {
         int* arr = (int*) malloc(sizeof(int) * myDataLen);
         int index = 0;
         for(int i = myStartIdx; i <= myEndIdx; i++){
-            arr[index] = input[i];
-            index++;
+            arr[index++] = input[i];
         }
 
         //printArray(arr, myDataLen);
@@ -100,41 +75,116 @@ int main(int argc, char *argv[]) {
         free(arr);
     } else {
         // THIS IS NOT A LEAF NODE
-        // CALL MERGE SORT
+        // printf("NOT a leaf node, ID: %s, Start Index: %d, End Index: %d, Data Size: %d\n", strMyID, myStartIdx, myEndIdx, myDataLen)
 
-        // Malloc array for total data - myDataLen holds this information
-        int* totalData = (int*) malloc(sizeof(int) * myDataLen);
-        
-        // Loop over all files that are children of this process
-        for(int i = 0; i < nChild; i++){
-            // Find new file that is child of this process
-            // Get amount of data that this file has
-            // Malloc new array for this file
-            // 
+        // FIRST WE READ IN THE ARRAY FROM THE FIRST CHILD SO WE HAVE AN ARRAY TO MERGE WITH IN THE FOR-LOOP
+
+        // Prepare file I/O variables
+        FILE* fp;
+        char* line = (char*) malloc(sizeof(char) * LineBufferSize);
+        size_t len = LineBufferSize;
+        ssize_t nread;
+        char* path = "output/";
+
+        // This will store the ID of the file we are getting our new array from
+        char* filename = (char*) malloc(sizeof(char) * 128);
+        sprintf(filename, "%s%s1.out", path, strMyID);
+        // printf("Current filename: %s\n", filename); // testing
+
+        // Open file with filename
+        fp = fopen(filename, "r");
+        if(fp == NULL){
+            printf("No file titled \"%s\" could be opened\n", filename);
         }
 
-        // char* curID = malloc(sizeof(char));
-        // int* childArray[MaxDataSize] = malloc(sizeof(int) * MaxDataSize * nChild);
-        // int curArray[] = malloc(sizeof(int) * MaxDataSize);
-        // for (int i = 1; i <= nChild; i++){
-        //     sprintf(curID, "%s%d", myID,i);
-        //     int curIndex = 0;
-        //     //while(// There are more lines in the file){
-        //         // Read from file to get array inputs
-        //         // curArray[j] = // next int read from file
-        //     //}
-        // }
+        // Get amount of data that this file has - store in dataAmount
+        int dataAmount;
+        if((nread = getLineFromFile(fp, line, len)) != 1){
+            sscanf(line, "%d\n", &dataAmount);
+        }
+        // printf("File Name: %s, Data Amount: %d\n", filename, dataAmount);
 
-        writeSortedResultToFile();
+        // Allocate memory for the first array to be read in
+        // It will have enough space to store all data for this process
+        int* prevArr = (int*) malloc(sizeof(int) * myDataLen);
+
+        // Read data into new array
+        int aNumber;
+        int idxInput = 0;
+        while((nread = getLineFromFile(fp, line, len)) != -1) {
+            sscanf(line, "%d\n", &aNumber);
+            prevArr[idxInput++] = aNumber;
+        }
         
-        printf("NOT a leaf node, ID: %s, Start Index: %d, End Index: %d, Data Size: %d\n", strMyID, myStartIdx, myEndIdx, myDataLen);
+        // printArray(prevArr, dataAmount);
+        
+        // Now we loop over the rest of the children and keep merging with the array made in the previous run through
+        for(int curChild = 2; curChild <= nChild; curChild++){
+            // File we will read from to get current quick sorted array
+            sprintf(filename, "%s%s%d.out", path, strMyID, curChild);
+
+            // printf("Current filename: %s\n", filename);
+
+            // Open file with filename
+            fp = fopen(filename, "r");
+            if(fp == NULL){
+                printf("No file titled \"%s\" could be opened\n", filename);
+            }
+
+            int newDataAmount;
+            // Get amount of data that this file has - store in dataAmount
+            if((nread = getLineFromFile(fp, line, len)) != 1){
+                sscanf(line, "%d\n", &newDataAmount);
+            }
+
+            // printf("File Name: %s, Data Amount: %d\n", filename, newDataAmount);
+
+            // Malloc new array for this file
+            int* arr = (int*) malloc(sizeof(int) * newDataAmount);
+
+            // Read data into new array
+            idxInput = 0;
+            while((nread = getLineFromFile(fp, line, len)) != -1) {
+                sscanf(line, "%d\n", &aNumber);
+                arr[idxInput++] = aNumber;
+            }
+
+            // printf("%s prevArr: ", strMyID);
+            // printArray(prevArr, dataAmount); // testing
+            // printf("%s arr: ", strMyID);
+            // printArray(arr, newDataAmount); // testing
+
+            // Allocate space for a new array to hold the merged arrays
+            int* newData = (int*) malloc(sizeof(int) * (dataAmount + newDataAmount));
+
+            // Merge the new array into the previous array and store in another array
+            merge(newData, prevArr, arr, dataAmount, newDataAmount);
+
+            //printf("MERGED\n");
+
+            // Update dataAmount variable
+            dataAmount += newDataAmount;
+            // printf("Sorted data: ");
+            // printArray(newData, dataAmount); // testing
+
+            // Copy contents of newData array into prevArr to use for next run through for-loop
+            for(int i = 0; i < dataAmount; i++){
+                prevArr[i] = newData[i];
+            }
+
+            // Free newly allocated array
+            free(arr);
+            free(newData);
+        }
+
+        writeSortedResultToFile(strMyID, prevArr, myDataLen);
+        printf("Process [%s] - Merge Sort - Done\n", strMyID);
+
+        free(filename);
+        free(prevArr);
+        free(line);
+        fclose(fp);
     }
-
-    //printf("Inside child program, ID: %s, Depth: %d, Total Depth: %d\n", strMyID, myDepth, depth);
-
-
-    // Have to write to file the sorted contents of the array passed into this function
-    // writeSortedResultToFile(strMyID, arr, myDataLen);
 
     return EXIT_SUCCESS;
 }
