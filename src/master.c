@@ -21,11 +21,13 @@ int main(int argc, char *argv[]) {
     size_t len = LineBufferSize;                                    // The size of the line buffer
     ssize_t nread;                                                  // Length of a new line read
 
+    // Set up the input file name
     char inputFileName[MaxFileNameLength];
     memset(inputFileName, '\0', MaxFileNameLength);
     sprintf(inputFileName, "input/%s", argv[1]);
 
-    if ((fp = getFilePointer(inputFileName)) == NULL) {             // Open a file and return file pointer to the file
+    // Open a file and return file pointer to the file
+    if ((fp = getFilePointer(inputFileName)) == NULL) {             
         printf("There is no input data.\n");
         exit(EXIT_FAILURE);
     }
@@ -37,54 +39,76 @@ int main(int argc, char *argv[]) {
         sscanf(line, "%d %d\n", &nData, &depth);
     }
 
+    // Error handling for amount of data in file
+    if(nData < 1 || nData > 1000){
+        printf("ERROR: Assumption violation: N. Data (%d) should be between 1 and 1000.\n", nData);
+        exit(EXIT_FAILURE);
+    }
+
+    // Error handling for depth of process creation
     if(depth > 9){
-        printf("Depth is greater than 9.\n");
+        printf("ERROR: Assumption violation: Depth (%d) is greater than 9.\n", depth);
+        exit(EXIT_FAILURE);
+    } else if(depth < 0){
+        printf("ERROR: Assumption violation: Depth (%d) is less than 0.\n", depth);
         exit(EXIT_FAILURE);
     }
 
 
-    // TODO: Read degrees of each level - DONE
+    // Read degrees of each level
     int* degreesPerLevel = malloc(sizeof(int) * depth);
     if(depth != 0){
         char* token;
         char* delimiter = " ";
         int i = 0;
         if((nread = getLineFromFile(fp, line, len)) != -1){
+            // Read first token from line
             token = strtok(line, delimiter);
             if(token == NULL){
                 printf("No degrees arguments found despite a number greater than zero being specified.\n");
                 exit(EXIT_FAILURE);
             }
+            // Read tokens and add to array until token is at end of the line
             while(token != NULL){
                 int curDegree = atoi(token);
-                if(curDegree >= 0 && curDegree <= MaxDegree){
+                if(curDegree >= 1 && curDegree <= MaxDegree){
                     degreesPerLevel[i++] = curDegree;
                 } else {
-                    printf("Degree greater than 10 or less than 0 found.\n");
-                    exit(0);
+                    // Error handling for if a degree is an invalid size
+                    printf("ERROR: Assumption violation: Degree (%d) of a depth (%d) should be between 1 and 9.\n", curDegree, i);
+                    exit(EXIT_FAILURE);
                 }
                 token = strtok(NULL, delimiter);
             }
         }
+    } else {
+        // If depth isn't zero, read the new line character so we can start reading input data
+        nread = getLineFromFile(fp, line, len);
     }
 
-    printArray(degreesPerLevel, depth);
+    // Error handling for number of leaf nodes
+    int numLeafNodes = degreesPerLevel[depth - 1];
+    if(numLeafNodes > nData){
+        printf("ERROR: Assumption violation: N. leaf nodes (%d) is greater than N. data (%d).\n", numLeafNodes, nData);
+        exit(EXIT_FAILURE);
+    }
 
-    // Read input data
-    int * input = (int *)malloc(sizeof(int) * nData);
+    // Read input data and store in input array
+    int* input = (int*) malloc(sizeof(int) * nData);
     int aNumber;
     int idxInput = 0;
     while((nread = getLineFromFile(fp, line, len)) != -1) {
         sscanf(line, "%d\n", &aNumber);
         input[idxInput++] = aNumber;
     }
-
-    printArray(input, nData);
     
-    // TODO: Spawn child processes and launch childProgram if necessary
+    // SET UP VARIABLES NECESSARY TO SPAWN CHILDREN
+
+    // IDs for current process and new child process
     char strID[128];
     char newID[128];
 
+    // Indexes needed to sort out data partitioning
     int startIndex = 0;
     int endIndex = 0;
     int curDataSize = nData;
@@ -92,6 +116,7 @@ int main(int argc, char *argv[]) {
     int childStartIndex = endIndex;
     int newStartIndex = 0;
 
+    // isChild boolean and pid variables instantiated
     int isChild = 0;
     int pid;
     
@@ -133,9 +158,7 @@ int main(int argc, char *argv[]) {
                 if(curDepth == 1){
                     strcpy(strID, "master");
                 }
-                //printf("String ID: %s\n", strID);
-                printf("Parent [%s] - Spawn Child [Level: %d, ID: %s, Start Index: %d, End Index: %d, Data Size: %d]\n", strID, curDepth, newID, startIndex, endIndex, curDataSize);
-                //printf("Parent [%s] - Spawn Child [Level: %d, ID: %s, Start Index: %d, End Index: %d, Data Size: %d]\n", strID, myDepth + 1, childID, startIndex, endIndex, dataSize);
+                printf("Parent [%s] - Spawn Child [%d, %s, %d, %d, %d]\n", strID, curDepth, newID, startIndex, endIndex, curDataSize);
                 break;
             }
         }
@@ -145,7 +168,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    // TODO: Wait all child processes to terminate if necessary
+    // WAIT FOR CHILDREN AND EXEC
     int numberOfChildren;
     pid_t terminated_pid;
     if(isChild){
@@ -153,7 +176,7 @@ int main(int argc, char *argv[]) {
         int depthOfCurrentProcess = strlen(newID);
         numberOfChildren = degreesPerLevel[depthOfCurrentProcess];
         for(int i = 0; i < numberOfChildren; i++){
-            terminated_pid = wait(NULL);\
+            terminated_pid = wait(NULL);
         }
 
         // CONVERT ALL DATA VARIABLES TO STRINGS
@@ -170,11 +193,15 @@ int main(int argc, char *argv[]) {
         sprintf(strDepth, "%d", depth);
         sprintf(strNumChildren, "%d", numberOfChildren);
 
-        // CALL CHILD PROGRAM
+        // CALL CHILD PROGRAM WITH NECESSARY ARGUMENTS
         execl("childProgram", "childProgram", strCurDepth, newID, strStartIndex, strEndIndex, strDataLen, inputFileName, strDepth, strNumChildren, NULL);
         printf("Error executing child program, strID: %s\n", strID);
         exit(EXIT_FAILURE);
     }
+
+
+
+
 
     // ONLY MASTER PROCESS GETS TO THIS POINT
     // Wait for master's children to complete
@@ -183,12 +210,15 @@ int main(int argc, char *argv[]) {
         terminated_pid = wait(NULL);
     }
 
-
-    // IF WE HAVE NO CHILDREN, CALL QUICK SORT DIRECTLY
+    // IF WE HAVE NO CHILDREN, CALL QUICK SORT DIRECTLY, FREE, AND EXIT
     if(numberOfChildren == 0){
-        quickSort(input, 0, nData);
+        quickSort(input, 0, nData - 1);
         writeSortedResultToFile("master", input, nData);
         printf("Process [master] - Quick Sort - Done\n");
+        free(input);
+        free(degreesPerLevel);
+        free(line);
+        fclose(fp);
         return EXIT_SUCCESS;
     }
 
@@ -196,14 +226,10 @@ int main(int argc, char *argv[]) {
 
 
 
+    // IF WE DO HAVE CHILDREN, CALL MERGE SORT FROM INTERMEDIATE FILES
+    // The same process as in childprogram.c is used here
 
-
-    // CALL MERGE SORT FROM INTERMEDIATE FILES
-
-    // Prepare file I/O variables
-    //char* line = (char*) malloc(sizeof(char) * LineBufferSize);
-    //size_t len = LineBufferSize;
-    //ssize_t nread;
+    // Prepare for file I/O
     char* path = "output/";
 
     // This will store the ID of the file we are getting our new array from
@@ -220,7 +246,6 @@ int main(int argc, char *argv[]) {
     int dataAmount;
     if((nread = getLineFromFile(fp, line, len)) != 1){
         sscanf(line, "%d\n", &dataAmount);
-        //printf("Data Amount read in: %d\n", dataAmount); // THIS WORKS CORRECTLY
     }
 
     // Allocate memory for the first array to be read in
@@ -234,11 +259,10 @@ int main(int argc, char *argv[]) {
         prevArr[idxInput++] = aNumber;
     }
 
+    // Loop over all children and merge with previous children's data
     for(int curChild = 2; curChild <= numberOfChildren; curChild++){
         // File we will read from to get current quick sorted array
         sprintf(filename, "%s%d.out", path, curChild);
-
-        // printf("Current filename: %s\n", filename);
 
         // Open file with filename
         fp = fopen(filename, "r");
@@ -246,14 +270,12 @@ int main(int argc, char *argv[]) {
             printf("No file titled \"%s\" could be opened\n", filename);
         }
 
+
+        // Get amount of data that this file has - store in newDataAmount
         int newDataAmount;
-        // Get amount of data that this file has - store in dataAmount
         if((nread = getLineFromFile(fp, line, len)) != 1){
             sscanf(line, "%d\n", &newDataAmount);
-            //printf("Data Amount read in: %d\n", newDataAmount); // THIS WORKS CORRECTLY
         }
-
-        // printf("File Name: %s, Data Amount: %d\n", filename, newDataAmount);
 
         // Malloc new array for this file
         int* arr = (int*) malloc(sizeof(int) * newDataAmount);
@@ -265,23 +287,14 @@ int main(int argc, char *argv[]) {
             arr[idxInput++] = aNumber;
         }
 
-        // printf("prevArr: ");
-        // printArray(prevArr, dataAmount); // testing
-        // printf("arr: ");
-        // printArray(arr, newDataAmount); // testing
-
         // Allocate space for a new array to hold the merged arrays
         int* newData = (int*) malloc(sizeof(int) * (dataAmount + newDataAmount));
 
         // Merge the new array into the previous array and store in another array
         merge(newData, prevArr, arr, dataAmount, newDataAmount);
 
-        //printf("MERGED\n");
-
         // Update dataAmount variable
         dataAmount += newDataAmount;
-        // printf("Sorted data: ");
-        // printArray(newData, dataAmount); // testing
 
         // Copy contents of newData array into prevArr to use for next run through for-loop
         for(int i = 0; i < dataAmount; i++){
