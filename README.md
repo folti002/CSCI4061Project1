@@ -6,15 +6,14 @@ Contributions:
   Mikkel Folting: Worked on child creation and incorporating quick and merge sort
   Reed Fazenbaker: Worked on merge, quick sort, and accessing files
   
-Leaf Node Sorting Program:
+Leaf Node Sorting Program:  
+```
 void quickSort(int arr[], int low, int high) {
    int a, b, split, temp;
-   
    if(low<high){
       split=low;
       a=low;
       b=high;
-
       while(a<b){
          while(arr[a]<=arr[split]&&a<high)
             a++;
@@ -26,7 +25,6 @@ void quickSort(int arr[], int low, int high) {
             arr[b]=temp;
          }
       }
-
       temp=arr[split];
       arr[split]=arr[b];
       arr[b]=temp;
@@ -34,6 +32,7 @@ void quickSort(int arr[], int low, int high) {
       quickSort(arr,b+1,high);
    }
 }
+```
 
 Assumptions: We made no significant assumptions
 
