@@ -1,3 +1,9 @@
+/* test machine: csel-kh1250-01.cselabs.umn.edu 
+ * group number: G[27] 
+ * name: Reed Fazenbaker, Mikkel Folting
+ * x500: fazen007, folti002
+*/
+
 #include "myutils.h"
 
 int main(int argc, char *argv[]) {
