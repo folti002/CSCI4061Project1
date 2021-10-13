@@ -4,9 +4,9 @@ Partners:
 Reed Fazenbaker (fazen007)  
 Mikkel Folting (folti002)
 
-Contributions:
-  Mikkel Folting: Worked on child creation and incorporating quick and merge sort
-  Reed Fazenbaker: Worked on merge, quick sort, and accessing files
+## Contributions:  
+Mikkel Folting: Worked on child creation and incorporating quick and merge sort  
+Reed Fazenbaker: Worked on merge, quick sort, and accessing files
   
 Leaf Node Sorting Program:  
 ```
