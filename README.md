@@ -5,10 +5,11 @@ Reed Fazenbaker (fazen007)
 Mikkel Folting (folti002)
 
 ## Contributions:  
-Mikkel Folting: Worked on child creation and incorporating quick and merge sort  
-Reed Fazenbaker: Worked on merge, quick sort, and accessing files
+Mikkel Folting: Worked on data partitioning, child creation, and incorporating quick and merge sort into master.c 
+Reed Fazenbaker: Worked on merge and quick sort algorithms, and reading from files in childprogram.c
   
-Leaf Node Sorting Program:  
+## Leaf Node Sorting Program:  
+Quick Sort was used as follows:
 ```
 void quickSort(int arr[], int low, int high) {
    int a, b, split, temp;
@@ -36,8 +37,11 @@ void quickSort(int arr[], int low, int high) {
 }
 ```
 
-Assumptions: We made no significant assumptions
+## Assumptions:  
+We made no significant assumptions
 
-To compile the program: make
+## To compile the program:  
+make
 
-To run the program: ./master inputFile
+## To run the program:  
+./master inputFile
