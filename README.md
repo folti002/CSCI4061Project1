@@ -1,6 +1,8 @@
 # CSCI 4061 Project 1
-Project Group Number: 27
-Partners: Reed Fazenbaker (fazen007) Mikkel Folting (folti002)
+## Project Group Number: 27  
+Partners:  
+Reed Fazenbaker (fazen007)  
+Mikkel Folting (folti002)
 
 Contributions:
   Mikkel Folting: Worked on child creation and incorporating quick and merge sort
