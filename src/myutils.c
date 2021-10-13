@@ -56,8 +56,26 @@ void quickSort(int arr[], int low, int high) {
 // TODO: Multiway Merge Sort with multiple data streams from intermediate files
 
 // Merge takes in amount of data in a file, total array, and new array
-void merge(int* totalArr, int* ){
-   
+void merge(int arrOne[], int arrTwo[], int lenOne, int lentwo) {
+   int i;
+   int j;
+   int x;
+   int merged[] = malloc(sizeof(int)*(lenOne+lenTwo));
+
+   for (x = 0; x < lenOne+lenTwo; x++){
+      for (i = 0; i<lenOne; i++){
+         for (j = 0; j < lenTwo; j++){
+            if (arrOne[i] > arrTwo[j]){
+               merged[x] = arrTwo[j];
+            }else if (arrOne[i] < arrTwo[j]){
+               merged[x] = arrOne[i];
+            }else{
+               merged[x] = arrOne[i];
+            }
+         }
+         
+      }
+   }
 }
 
 //void merge(char* myID, int depth, int nChild) {
