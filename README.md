@@ -1,6 +1,5 @@
 # CSCI 4061 Project 1
 ## Project Group Number: 27  
-Partners:  
 Reed Fazenbaker (fazen007)  
 Mikkel Folting (folti002)
 
@@ -9,7 +8,7 @@ Mikkel Folting: Worked on data partitioning, child creation, and incorporating q
 Reed Fazenbaker: Worked on merge and quick sort algorithms, and reading from files in childprogram.c
   
 ## Leaf Node Sorting Program:  
-Quick Sort was used as follows:
+Quick Sort was used and is implemented as follows:
 ```
 void quickSort(int arr[], int low, int high) {
    int a, b, split, temp;
@@ -38,7 +37,7 @@ void quickSort(int arr[], int low, int high) {
 ```
 
 ## Assumptions:  
-We made no significant assumptions.
+We made no significant assumptions outside of the code specifications.
 
 ## To compile the program:  
 ```
