@@ -77,9 +77,6 @@ int main(int argc, char *argv[]) {
         input[idxInput++] = aNumber;
     }
 
-    free(line);
-    fclose(fp);
-
     printArray(input, nData);
     
     // TODO: Spawn child processes and launch childProgram if necessary
@@ -106,9 +103,10 @@ int main(int argc, char *argv[]) {
             // Data Partitions
             if(curID == degree){
                 // THIS IS THE SPECIAL CASE FOR DATA PARTITIONING
+                // If this child process is the last child process created by its parent
                 childDataSize = curDataSize - (degree - 1) * floor(curDataSize / degree);
             } else {
-                // NORMAL FLOOR CALCULATIONS
+                // NORMAL FLOOR CALCULATIONS FOR CHILD PROCESSES THAT AREN'T THE LAST ONES
                 childDataSize = floor(curDataSize / degree);
             }
 
@@ -171,99 +169,128 @@ int main(int argc, char *argv[]) {
         sprintf(strNumChildren, "%d", numberOfChildren);
 
         // CALL CHILD PROGRAM
-        execl("childProgram", "childProgram", strCurDepth, newID, strStartIndex, strEndIndex, strDataLen, inputFileName, strDepth, NULL);
+        execl("childProgram", "childProgram", strCurDepth, newID, strStartIndex, strEndIndex, strDataLen, inputFileName, strDepth, strNumChildren, NULL);
         printf("Error executing child program, strID: %s\n", strID);
         exit(EXIT_FAILURE);
     }
 
-    // ONLY MASTER GETS TO THIS POINT
+    // ONLY MASTER PROCESS GETS TO THIS POINT
     // Wait for master's children to complete
     numberOfChildren = degreesPerLevel[0];
     for(int i = 0; i < numberOfChildren; i++){
         terminated_pid = wait(NULL);
     }
-    printf("I AM THE MASTER\n");
+
+    if(numberOfChildren == 0){
+        // CALL QUICK SORT
+        quickSort(input, 0, nData - 1);
+        writeSortedResultToFile("master", input, nData);
+        printf("Process [master] - Quick Sort - Done\n");
+        return EXIT_SUCCESS;
+    }
 
     // CALL MERGE SORT FROM INTERMEDIATE FILES
 
+    // Prepare file I/O variables
+    //char* line = (char*) malloc(sizeof(char) * LineBufferSize);
+    //size_t len = LineBufferSize;
+    //ssize_t nread;
+    char* path = "output/";
+
+    // This will store the ID of the file we are getting our new array from
+    char* filename = (char*) malloc(sizeof(char) * 128);
+    sprintf(filename, "%s1.out", path);
+
+    // Open file with filename
+    fp = fopen(filename, "r");
+    if(fp == NULL){
+        printf("No file titled \"%s\" could be opened\n", filename);
+    }
+
+    // Get amount of data that this file has - store in dataAmount
+    int dataAmount;
+    if((nread = getLineFromFile(fp, line, len)) != 1){
+        sscanf(line, "%d\n", &dataAmount);
+    }
+
+    // Allocate memory for the first array to be read in
+    // It will have enough space to store all data for this process
+    int* prevArr = (int*) malloc(sizeof(int) * nData);
+
+    // Read data into new array
+    idxInput = 0;
+    while((nread = getLineFromFile(fp, line, len)) != -1) {
+        sscanf(line, "%d\n", &aNumber);
+        prevArr[idxInput++] = aNumber;
+    }
+
+    for(int curChild = 2; curChild <= numberOfChildren; curChild++){
+        // File we will read from to get current quick sorted array
+        sprintf(filename, "%s%d.out", path, curChild);
+
+        // printf("Current filename: %s\n", filename);
+
+        // Open file with filename
+        fp = fopen(filename, "r");
+        if(fp == NULL){
+            printf("No file titled \"%s\" could be opened\n", filename);
+        }
+
+        int newDataAmount;
+        // Get amount of data that this file has - store in dataAmount
+        if((nread = getLineFromFile(fp, line, len)) != 1){
+            sscanf(line, "%d\n", &newDataAmount);
+        }
+
+        // printf("File Name: %s, Data Amount: %d\n", filename, newDataAmount);
+
+        // Malloc new array for this file
+        int* arr = (int*) malloc(sizeof(int) * newDataAmount);
+
+        // Read data into new array
+        idxInput = 0;
+        while((nread = getLineFromFile(fp, line, len)) != -1) {
+            sscanf(line, "%d\n", &aNumber);
+            arr[idxInput++] = aNumber;
+        }
+
+        // printf("%s prevArr: ", strMyID);
+        // printArray(prevArr, dataAmount); // testing
+        // printf("%s arr: ", strMyID);
+        // printArray(arr, newDataAmount); // testing
+
+        // Allocate space for a new array to hold the merged arrays
+        int* newData = (int*) malloc(sizeof(int) * (dataAmount + newDataAmount));
+
+        // Merge the new array into the previous array and store in another array
+        merge(newData, prevArr, arr, dataAmount, newDataAmount);
+
+        //printf("MERGED\n");
+
+        // Update dataAmount variable
+        dataAmount += newDataAmount;
+        // printf("Sorted data: ");
+        // printArray(newData, dataAmount); // testing
+
+        // Copy contents of newData array into prevArr to use for next run through for-loop
+        for(int i = 0; i < dataAmount; i++){
+            prevArr[i] = newData[i];
+        }
+
+        // Free newly allocated array
+        free(arr);
+        free(newData);
+    }
+
+    // Free items used for merge
+    free(filename);
+    free(prevArr);
+    free(line);
+    fclose(fp);
 
 
-//     for(int i = 0; i < degree; i++){
-//         childrenMade++;
-//         char childID[MaxDepth];
-//         sprintf(childID, "%d", childrenMade);
-
-//         // CALCULATE START AND END INDEX
-//         int m = nData;
-//         int k = degree;
-
-//         if(i == degree - 1){
-//             int temp = endIndex;
-//             startIndex = endIndex;
-//             endIndex = nData;
-//         } else {
-//             int temp = startIndex;
-//             startIndex += i * floor(m / k);
-//             endIndex = temp + floor(m / k);
-//         }
-
-//         char strStartIndex[100];
-//         sprintf(strStartIndex, "%d", startIndex);
-
-//         char strEndIndex[100];
-//         sprintf(strEndIndex, "%d", endIndex);
-
-//         int dataSize = endIndex - startIndex;
-//         char strDataSize[100];
-//         sprintf(strDataSize, "%d", dataSize);
-
-//         pid = fork();
-
-//         if(pid > 0){
-//             // Print to console information about the child that was just created
-//             printf("Parent [%s] - Spawn Child [Level: %d, ID: %s, Start Index: %d, End Index: %d, Data Size: %d]\n", strID, myDepth + 1, childID, startIndex, endIndex, dataSize);
-//         } else if(pid < 0){
-//             // Child process not created properly
-//             printf("Error creating child process.\n");
-//             exit(0);
-//         } else {
-//             // CALL CHILD PROGRAM
-//             char strChildDepth[MaxDepth];
-//             sprintf(strChildDepth, "%d", myDepth + 1);
-
-//             char totalDepth[MaxDepth];
-//             sprintf(totalDepth, "%d", depth);
-            
-//             execl("childProgram", "childProgram", strChildDepth, childID, strStartIndex, strEndIndex, strDataSize, inputFileName, totalDepth, strDegreesArr, NULL);
-//             printf("Error executing childProgram.\n");
-//             exit(0);
-//         }
-//     }
-
-
-    // myID as a string
-    // char asStrID[MaxDepth];
-    // if(myID != 0){
-    //     char* args[] = {"childProgram", depth, myID, itoa(myID, strID, MaxDepth), 0, 0, 0, inputFileName};
-    //     execv("childProgram", args);
-    //     printf("Error executing childProgram\n");
-    //     exit(0);
-    // }
-
-
-    // pid_t terminated_pid;
-    // for(int i = 0; i < degreesPerLevel[0]; i++){
-    //     terminated_pid = wait(NULL);
-    //     printf("Child process (%d) terminated.\n", terminated_pid);
-    // }
-
-    // TODO: Merge sort or Quick sort (or other leaf node sorting algorithm)
-    
-
-    // CALL MERGE SORT
-    // printf("%s Merge Sort\n", strID);
-    // printf("Process [%s] - Merge Sort - Done", myID);
-    // printf("Process [%s] - Quick Sort - Done", myID);
+    writeSortedResultToFile("master", prevArr, dataAmount);
+    printf("Process [master] - Merge Sort - Done\n");
 
     // Free malloc'd arrays
     free(input);

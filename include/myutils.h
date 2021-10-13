@@ -26,6 +26,6 @@ void printArray(int arr[], int size);
 void writeSortedResultToFile(char* myID, int arr[], int size);
 
 void quickSort(int arr[], int low, int high);
-void merge(char* myID, int depth, int nChild);
+void merge(int totalArr[], int arrOne[], int arrTwo[], int lenOne, int lenTwo);
 
 #endif //MYUTILS_H
