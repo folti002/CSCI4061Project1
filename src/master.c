@@ -26,6 +26,7 @@ int main(int argc, char *argv[]) {
     sprintf(inputFileName, "input/%s", argv[1]);
 
     if ((fp = getFilePointer(inputFileName)) == NULL) {             // Open a file and return file pointer to the file
+        printf("There is no input data.\n");
         exit(EXIT_FAILURE);
     }
 
@@ -36,10 +37,11 @@ int main(int argc, char *argv[]) {
         sscanf(line, "%d %d\n", &nData, &depth);
     }
 
-    if(depth > 9 || depth < 0){
-        printf("Depth is greater than 9 or less than 0.\n");
+    if(depth > 9){
+        printf("Depth is greater than 9.\n");
         exit(EXIT_FAILURE);
     }
+
 
     // TODO: Read degrees of each level - DONE
     int* degreesPerLevel = malloc(sizeof(int) * depth);
