@@ -38,10 +38,16 @@ void quickSort(int arr[], int low, int high) {
 ```
 
 ## Assumptions:  
-We made no significant assumptions
+We made no significant assumptions.
 
 ## To compile the program:  
+```
 make
+```
+Type the above command into the home directory of the project. 
 
 ## To run the program:  
+```
 ./master inputFile
+```
+Type the above command into the home directory of the project after calling make.
