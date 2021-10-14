@@ -1,4 +1,4 @@
-# CSCI 4061 Project 1
+# CSCI 4061 Project 1 - Parallel Multiway Merge Sort
 ## Project Group Number: 27  
 Reed Fazenbaker (fazen007)  
 Mikkel Folting (folti002)
